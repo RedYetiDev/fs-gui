@@ -1,0 +1,25 @@
+{
+  "name": "fs-gui",
+  "version": "1.0.0",
+  "description": "This package is like a GUI for \"fs\", it allows you to make a browser for files and more.",
+  "main": "browse.js",
+  "scripts": {
+    "start": "node browse.js"
+  },
+  "keywords": [
+    "browse",
+    "files",
+    "fs",
+    "gui",
+    "fs-gui",
+    "path",
+    "directory",
+    "dir",
+    "file"
+  ],
+  "author": "RedYetiDev",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "inquirer": "^8.0.0"
+  }
+}
