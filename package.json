@@ -18,7 +18,7 @@
     "file"
   ],
   "author": "RedYetiDev",
-  "license": "MPL-2.0",
+  "license": "CC-BY-4.0",
   "dependencies": {
     "inquirer": "^8.0.0"
   }
