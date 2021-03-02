@@ -3,116 +3,260 @@ const path = require("path")
 const inquirer = require('inquirer');
 const util = require('util');
 const readdir = util.promisify(fs.readdir);
-async function all(message) {
-  var contents = await readdir(__dirname)
-  console.log(contents)
-  contents.push("..")
-  inquirer
-    .prompt([
-      {
-        type: 'list',
-        name: 'selection',
-        message: message,
-        choices: contents,
-      },
-      {
-        type: 'list',
-        name: 'confirm',
-        message: "Would like to use this file/directory, enter this directory, or Go Back",
-        choices: ["Use","Enter","Go Back"],
-      },
-    ])
-    .then((answers) => {
-      if (answers.confirm == "Use") {
-        console.log("You selected " + answers.selection);
-        return path.join(process.cwd(), answers.selection)
-      } else if (answers.confirm == "Enter"){
-        if (!fs.lstatSync(answers.selection).isDirectory()) {
-          console.log("Error! You cant enter a file as a directory.")
-          all(message, confirm)
+function searchAll(message) {
+  return new Promise(async(resolve, reject) => {
+    var contents = await readdir(process.cwd())
+    contents.push("..")
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'selection',
+          message: message,
+          choices: contents,
+        },
+        {
+          type: 'list',
+          name: 'confirm',
+          message: "Would like to use this file/directory, enter this directory, or Go Back",
+          choices: ["Use","Enter","Go Back"],
+        },
+      ])
+      .then((answers) => {
+        if (answers.confirm == "Use") {
+          return resolve(path.join(process.cwd(), answers.selection))
+        } else if (answers.confirm == "Enter"){
+          if (!fs.lstatSync(answers.selection).isDirectory()) {
+            all(message, confirm)
+          } else {
+            process.chdir(answers.selection)
+            all(message, confirm)
+          }
         } else {
-          process.chdir(answers.selection)
           all(message, confirm)
         }
-      } else {
-        all(message, confirm)
-      }
-    });
+      });
+  });
 }
-async function dir(message, confirm) {
-  var contents = await readdir(process.cwd())
-  console.log(contents)
-  contents = contents.filter(item => fs.lstatSync(item).isDirectory())
-  console.log(contents)
-  contents.push("../")
-  inquirer
-    .prompt([
-      {
-        type: 'list',
-        name: 'selection',
-        message: message,
-        choices: contents,
-      },
-      {
-        type: 'list',
-        name: 'confirm',
-        message: "Would like to use this directory, enter this directory, or Go Back",
-        choices: ["Use","Enter","Go Back"],
-      }
-    ])
-    .then((answers) => {
-      if (answers.confirm == "Use") {
-        console.log("You selected " + answers.selection);
-        return path.join(process.cwd(), answers.selection)
-      } else if (answers.confirm == "Enter") {
-        process.chdir(answers.selection)
-        console.log(answers.selection)
-        console.log(process.cwd())
-        dir(message, confirm)
-      } else {
-        console.log("Going Back")
-        dir(message, confirm)
-      }
-    });
-}
-async function custom(message, ext) {
-  var contents = await readdir(__dirname)
-  contents = contents.filter(el => ext.includes(path.extname(el) || fs.lstatSync(el).isDirectory()))
-  console.log(contents)
-  contents.push("..")
-  inquirer
-    .prompt([
-      {
-        type: 'list',
-        name: 'selection',
-        message: message,
-        choices: contents,
-      },
-      {
-        type: 'list',
-        name: 'confirm',
-        message: "Would like to use this file/directory, enter this directory, or Go Back",
-        choices: ["Use","Enter","Go Back"],
-      },
-    ])
-    .then((answers) => {
-      if (answers.confirm == "Use") {
-        console.log("You selected " + answers.selection);
-        return path.join(process.cwd(), answers.selection)
-      } else if (answers.confirm == "Enter"){
-        if (!fs.lstatSync(answers.selection).isDirectory()) {
-          console.log("Error! You cant enter a file as a directory.")
-          custom(message, confirm)
-        } else {
+function searchDir(message, confirm) {
+  return new Promise(async(resolve, reject) => {
+    var contents = await readdir(process.cwd())
+    contents = contents.filter(item => fs.lstatSync(item).isDirectory())
+    contents.push("../")
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'selection',
+          message: message,
+          choices: contents,
+        },
+        {
+          type: 'list',
+          name: 'confirm',
+          message: "Would like to use this directory, enter this directory, or Go Back",
+          choices: ["Use","Enter","Go Back"],
+        }
+      ])
+      .then((answers) => {
+        if (answers.confirm == "Use") {
+          return resolve(path.join(process.cwd(), answers.selection))
+        } else if (answers.confirm == "Enter") {
           process.chdir(answers.selection)
+          dir(message, confirm)
+        } else {
+          dir(message, confirm)
+        }
+      });
+  });
+}
+function searchCustom(message, ext) {
+  return new Promise(async(resolve, reject) => {
+    var contents = await readdir(process.cwd())
+    contents = contents.filter(el => ext.includes(path.extname(el) || fs.lstatSync(el).isDirectory()))
+    contents.push("..")
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'selection',
+          message: message,
+          choices: contents,
+        },
+        {
+          type: 'list',
+          name: 'confirm',
+          message: "Would like to use this file/directory, enter this directory, or Go Back",
+          choices: ["Use","Enter","Go Back"],
+        },
+      ])
+      .then((answers) => {
+        if (answers.confirm == "Use") {
+          return resolve(path.join(process.cwd(), answers.selection))
+        } else if (answers.confirm == "Enter"){
+          if (!fs.lstatSync(answers.selection).isDirectory()) {
+            console.log("Error! You cant enter a file as a directory.")
+            custom(message, confirm)
+          } else {
+            process.chdir(answers.selection)
+            custom(message, confirm)
+          }
+        } else {
           custom(message, confirm)
         }
-      } else {
-        custom(message, confirm)
-      }
-    });
+      });
+  });
 }
-custom("Test",[".json"])
-module.exports.dir = dir
-module.exports.all = all
-module.exports.custom = custom
+function createFile(data) {
+  return new Promise(async(resolve, reject) => {
+    var contents = await readdir(process.cwd())
+    contents = contents.filter(item => fs.lstatSync(item).isDirectory())
+    contents.push("../")
+    contents.push("Create Here")
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'selection',
+          message: "Choose a directory for file creation",
+          choices: contents,
+        }
+      ])
+      .then((answers) => {
+        if (answers.selection != "Create Here") {
+          process.chdir(answers.selection)
+          createFile(data)
+        } else {
+          inquirer.prompt([
+            {
+              type: 'input',
+              name: 'filename',
+              message: 'File name and extension:'
+            }
+          ]).then((files) => {
+            var file = files.filename
+            fs.writeFile(file, data, (err) => {
+              return resolve(true)
+            })
+          })
+        }
+      });
+    })
+}
+function createFolder() {
+  return new Promise(async(resolve, reject) => {
+    var contents = await readdir(process.cwd())
+    contents = contents.filter(item => fs.lstatSync(item).isDirectory())
+    contents.push("../")
+    contents.push("Create Here")
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'selection',
+          message: "Choose a directory for folder creation",
+          choices: contents,
+        }
+      ])
+      .then((answers) => {
+        if (answers.selection != "Create Here") {
+          process.chdir(answers.selection)
+          createFile(data)
+        } else {
+          inquirer.prompt([
+            {
+              type: 'input',
+              name: 'name',
+              message: 'folder name'
+            }
+          ]).then((folder) => {
+            var folder = folder.name
+            fs.mkdir(folder, (err) => {
+              return resolve(true)
+            })
+          })
+        }
+      });
+    })
+}
+function deleteFile() {
+  return new Promise(async(resolve, reject) => {
+    var contents = await readdir(process.cwd())
+    contents.push("..")
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'selection',
+          message: message,
+          choices: contents,
+        },
+      ])
+      .then((answers) => {
+        if (fs.lstatSync(answers.selection).isDirectory()) {
+          process.chdir(answers.selection)
+          deleteFile()
+        } else {
+          inquirer.prompt([
+            {
+              type: 'confirm',
+              name: 'confirm',
+              message: "Are You sure you want to delete this file?"
+            }
+          ]).then((c) => {
+            if (c.confirm == true) {
+              fs.unlink(answers.selection, (err) => {
+                console.log('File deleted');
+              });
+            }
+          })
+        }
+      });
+  });
+}
+function deleteFolder() {
+  return new Promise(async(resolve, reject) => {
+    var contents = await readdir(process.cwd())
+    contents = contents.filter(item => fs.lstatSync(item).isDirectory())
+    contents.push("..")
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'selection',
+          message: "Choose a folder to delete or enter",
+          choices: contents,
+        },
+        {
+          type: 'list',
+          name: 'confirm',
+          message: "Delete or Enter this folder?",
+          choices: ["Delete", "Enter"]
+        },
+      ])
+      .then((answers) => {
+        if (answers.confirm == "Enter" || answers.selection == "..") {
+          process.chdir(answers.selection)
+          deleteFolder()
+        }
+        else {
+          if (!fs.lstatSync(answers.selection).isDirectory()) {
+            console.log("Uh Oh! This function is for deleting files, not directories.")
+            deleteFile()
+          } else {
+            fs.rmdir(answers.selection, (err) => {
+              console.log('Folder deleted');
+            });
+          }
+        }
+      });
+  });
+}
+module.exports.searchDir = searchDir
+module.exports.searchAll = searchAll
+module.exports.searchCustom = searchCustom
+module.exports.createFile = createFile
+module.exports.createFolder = createFolder
+module.exports.deleteFile = deleteFile
+module.exports.deleteFolder = deleteFolder
+module.exports.fs = fs
