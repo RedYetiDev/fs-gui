@@ -96,13 +96,13 @@ function searchCustom(message, ext) {
         } else if (answers.confirm == "Enter"){
           if (!fs.lstatSync(answers.selection).isDirectory()) {
             console.log("Error! You cant enter a file as a directory.")
-            searchCustom(message, confirm)
+            searchCustom(message, ext)
           } else {
             process.chdir(answers.selection)
-            searchCustom(message, confirm)
+            searchCustom(message, ext)
           }
         } else {
-          searchCustom(message, confirm)
+          searchCustom(message, ext)
         }
       });
   });
