@@ -27,13 +27,13 @@ function searchAll(message) {
           return resolve(path.join(process.cwd(), answers.selection))
         } else if (answers.confirm == "Enter"){
           if (!fs.lstatSync(answers.selection).isDirectory()) {
-            all(message, confirm)
+            searchAll(message, confirm)
           } else {
             process.chdir(answers.selection)
-            all(message, confirm)
+            searchAll(message, confirm)
           }
         } else {
-          all(message, confirm)
+          searchAll(message, confirm)
         }
       });
   });
@@ -63,9 +63,9 @@ function searchDir(message, confirm) {
           return resolve(path.join(process.cwd(), answers.selection))
         } else if (answers.confirm == "Enter") {
           process.chdir(answers.selection)
-          dir(message, confirm)
+          searchDir(message, confirm)
         } else {
-          dir(message, confirm)
+          searchDir(message, confirm)
         }
       });
   });
@@ -96,13 +96,13 @@ function searchCustom(message, ext) {
         } else if (answers.confirm == "Enter"){
           if (!fs.lstatSync(answers.selection).isDirectory()) {
             console.log("Error! You cant enter a file as a directory.")
-            custom(message, confirm)
+            searchCustom(message, confirm)
           } else {
             process.chdir(answers.selection)
-            custom(message, confirm)
+            searchCustom(message, confirm)
           }
         } else {
-          custom(message, confirm)
+          searchCustom(message, confirm)
         }
       });
   });
