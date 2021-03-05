@@ -3,6 +3,7 @@ const path = require("path")
 const inquirer = require('inquirer');
 const util = require('util');
 const readdir = util.promisify(fs.readdir);
+
 function searchAll(message) {
   return new Promise(async(resolve, reject) => {
     var contents = await readdir(process.cwd())
@@ -27,18 +28,18 @@ function searchAll(message) {
           return resolve(path.join(process.cwd(), answers.selection))
         } else if (answers.confirm == "Enter"){
           if (!fs.lstatSync(answers.selection).isDirectory()) {
-            searchAll(message, confirm)
+            searchAll(message)
           } else {
             process.chdir(answers.selection)
-            searchAll(message, confirm)
+            searchAll(message)
           }
         } else {
-          searchAll(message, confirm)
+          searchAll(message)
         }
       });
   });
 }
-function searchDir(message, confirm) {
+function searchDir(message) {
   return new Promise(async(resolve, reject) => {
     var contents = await readdir(process.cwd())
     contents = contents.filter(item => fs.lstatSync(item).isDirectory())
@@ -63,9 +64,9 @@ function searchDir(message, confirm) {
           return resolve(path.join(process.cwd(), answers.selection))
         } else if (answers.confirm == "Enter") {
           process.chdir(answers.selection)
-          searchDir(message, confirm)
+          searchDir(message)
         } else {
-          searchDir(message, confirm)
+          searchDir(message)
         }
       });
   });
@@ -138,6 +139,33 @@ function createFile(data) {
             fs.writeFile(file, data, (err) => {
               return resolve(true)
             })
+          })
+        }
+      });
+    })
+}
+function createCustomFile(data, name) {
+  return new Promise(async(resolve, reject) => {
+    var contents = await readdir(process.cwd())
+    contents = contents.filter(item => fs.lstatSync(item).isDirectory())
+    contents.push("../")
+    contents.push("Create Here")
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'selection',
+          message: "Choose a directory for file creation",
+          choices: contents,
+        }
+      ])
+      .then((answers) => {
+        if (answers.selection != "Create Here") {
+          process.chdir(answers.selection)
+          createFile(data)
+        } else {
+          fs.writeFile(name, data, (err) => {
+            return resolve(true)
           })
         }
       });
@@ -252,10 +280,12 @@ function deleteFolder() {
       });
   });
 }
+
 module.exports.searchDir = searchDir
 module.exports.searchAll = searchAll
 module.exports.searchCustom = searchCustom
 module.exports.createFile = createFile
+module.exports.createCustomFile = createCustomFile
 module.exports.createFolder = createFolder
 module.exports.deleteFile = deleteFile
 module.exports.deleteFolder = deleteFolder

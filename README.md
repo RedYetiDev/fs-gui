@@ -16,9 +16,9 @@ const Explorer = require("fs-gui")
 
 ---
 
-- #### `Explorer.dir(message)`
+- #### `Explorer.searchDir(message)`
 
-  The `dir` function creates a selection menu for selecting a directory.
+  The `searchDir` function creates a selection menu for selecting a directory.
 
   This function returns the path of the directory selected.
 
@@ -26,9 +26,9 @@ const Explorer = require("fs-gui")
 
 ---
 
-- #### `Explorer.all(message)`
+- #### `Explorer.searchAll(message)`
 
-  The `all` function creates a selection menu for selecting all files.
+  The `searchAll` function creates a selection menu for selecting all files.
 
   This function returns the path to file/directory chosen.
 
@@ -36,13 +36,28 @@ const Explorer = require("fs-gui")
 
 ---
 
-- #### `Explorer.custom(message, ext)`
+- #### `Explorer.searchCustom(message, ext)`
 
-  The `custom` function creates a selection menu for selecting all files. This function returns the path to file/directory chosen
+  The `searchCustom` function creates a selection menu for selecting all files. This function returns the path to file/directory chosen
 
   The `message` parameter is the message to show the user, [e.g. `"Select a file or folder"`].
 
   The `ext` parameter is an array, containing the file extensions. [e.g. `[".txt",".pdf"]`]
+
+- #### `Explorer.createFile(data)`
+  The `createFile` functions creates a menu, showing the normal folders, but adds an extra option `Create File`. Once selected `Create File` asks for the name and extension. The `data` parameter is the contents of the file. It must be string.
+  
+- #### `Explorer.createCustomFile(data, name)`
+  Similar to `createFile`, but the name is already specified.
+
+- #### `Explorer.createFolder()`
+    The `createFolder` functions creates a menu, showing the normal folders, but adds an extra option `Create Folder`. Once selected `Create Folder` asks for the folder name.
+
+- #### `Explorer.deleteFile()`
+  The delete folder function is like the `searchAll` function, but for deleting files
+
+- #### `Explorer.deletFolder()`
+  The delete folder function is like the `searchDir` function, but for deleting folders.
 
 ## Examples
 The examples below are assuming your code has the following line
@@ -52,12 +67,11 @@ const Explorer = require("fs-gui")
 
 - If you wanted the user to select a `pdf` file
 ```js
-Explorer.custom("Select a PDF", [".pdf"])
+Explorer.searchCustom("Select a PDF", [".pdf"])
 ```
 
 - If you wanted the user to select a directory in the `node_modules` folder
-
 ```js
 process.chdir("node_modules")
-Explorer.dir("Select a directory")
+Explorer.searchDir("Select a directory")
 ```
